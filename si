@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Print user@hostname
+host_name=$(hostname)
+dns_name=$(nslookup $host_name | awk '/^Name:/ {print $2}')
+user_host="$(whoami)@$dns_name"
+echo "Host: $user_host"
+
+# Print OS name
+os_name=$(grep PRETTY_NAME /etc/os-release | cut -d '=' -f 2 | sed 's/"//g')
+echo "OS: $os_name"
+
+# Print CPU info
+cpu_info=$(grep -m 1 "model name" /proc/cpuinfo | cut -d ':' -f 2 | sed 's/^[ \t]*//')
+echo "CPU: $cpu_info"
+
+# Print kernel info
+kernel_info=$(uname -r)
+echo "Kernel: $kernel_info"
+
+# Print uptime
+uptime_info=$(uptime -p)
+echo "Uptime: $uptime_info"
+
+# Print CPU usage
+cpu_usage=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
+echo "CPU Usage: $cpu_usage%"
+
+# Print memory usage
+mem_info=($(free -m | awk 'NR==2{print $2,$3}'))
+used_memory=${mem_info[1]}
+total_memory=${mem_info[0]}
+echo "Memory Usage: ${used_memory}MB/${total_memory}MB"
